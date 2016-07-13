@@ -26,8 +26,29 @@ from config_bot import *
 def init_db():
    conn = sqlite3.connect("posts_replied_to.sqlite")
    c = conn.cursor()
-   cursor.execute('''CREATE TABLE users(id INTEGER PRIMARY KEY, post_id TEXT)''')
-db.commit()
+   c.execute('CREATE TABLE {table_name} ({new_field} {field_type})'\
+            .format(table_name = "posts", new_field = "post_id", field_type = "TEXT"))
+   c.commit()
+   c.close()
+
+def insert_db(post_id):
+   conn = sqlite3.connect("posts_replied_to.sqlite")
+   c = conn.cursor()
+   c.execute('''INSERT INTO posts(post_id) VALUES(?)''', (post_id))
+   c.commit()
+   c.close()
+
+def look_up_post_id(post_id):
+   conn = sqlite3.connect("posts_replied_to.sqlite")
+   c = conn.cursor()
+   
+   cursor.execute('''SELECT name, email, phone FROM users''')
+   user1 = cursor.fetchone() #retrieve the first row
+   print(user1[0]) #Print the first column retrieved(user's name)
+
+   c.commit()
+   c.close()
+
 def main():
 
    if not os.path.isfile("config_bot.py"):
