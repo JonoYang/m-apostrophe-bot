@@ -26,39 +26,34 @@ from config_bot import *
 def init_db():
    conn = sqlite3.connect("posts_replied_to.sqlite")
    c = conn.cursor()
-   c.execute('CREATE TABLE {table_name} ({new_field} {field_type})'\
-            .format(table_name = "posts", new_field = "post_id", field_type = "TEXT"))
-   c.commit()
-   c.close()
+   c.execute('CREATE TABLE posts (post_id TEXT)')
+   conn.commit()
+   conn.close()
 
 def insert_db(post_id):
    conn = sqlite3.connect("posts_replied_to.sqlite")
    c = conn.cursor()
-   c.execute('''INSERT INTO posts(post_id) VALUES(?)''', (post_id))
-   c.commit()
-   c.close()
+   c.execute('INSERT INTO posts VALUES (?)', (post_id,))
+   conn.commit()
+   conn.close()
 
 def look_up_post_id(post_id):
    conn = sqlite3.connect("posts_replied_to.sqlite")
    c = conn.cursor()
-   
-   cursor.execute('''SELECT name, email, phone FROM users''')
-   user1 = cursor.fetchone() #retrieve the first row
-   print(user1[0]) #Print the first column retrieved(user's name)
-
-   c.commit()
-   c.close()
+   c.execute('SELECT post_id FROM posts WHERE post_id = (?)', (post_id,))
+   data = c.fetchone()
+   conn.close()
+   return True if data != None else False
 
 def main():
-
    if not os.path.isfile("config_bot.py"):
       sys.exit("%s: config_bot.py missing. Create config_bot.py with Reddit credentials" % sys.argv[0])
    if not os.path.isfile("posts_replied_to.sqlite"):
       init_db()
 
-   user_agent = ("m-apostrophe-bot 0.1")
+   user_agent = "m-apostrophe-bot 0.1"
    r = praw.Reddit(user_agent = user_agent)
    r.login(REDDIT_USERNAME, REDDIT_PASS)
 
- if __name__ == '__main__':
+if __name__ == '__main__':
    main()
