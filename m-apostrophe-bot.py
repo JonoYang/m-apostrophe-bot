@@ -23,6 +23,7 @@ import sys
 import time
 from config_bot import *
 
+# Creates sqlite3 database with a table named posts with one row named post_id
 def init_db():
    conn = sqlite3.connect("posts_replied_to.sqlite")
    c = conn.cursor()
@@ -30,6 +31,7 @@ def init_db():
    conn.commit()
    conn.close()
 
+# Inserts a post id into the table posts
 def insert_db(post_id):
    conn = sqlite3.connect("posts_replied_to.sqlite")
    c = conn.cursor()
@@ -37,6 +39,8 @@ def insert_db(post_id):
    conn.commit()
    conn.close()
 
+# Looks up a post id to see if the bot has processed it before
+# Returns True if the bot has processed the post id before, False otherwise
 def look_up_post_id(post_id):
    conn = sqlite3.connect("posts_replied_to.sqlite") 
    c = conn.cursor()
@@ -45,6 +49,9 @@ def look_up_post_id(post_id):
    conn.close()
    return True if data != None else False
 
+# Main bot logic, puts apostrophes after words starting with m or M. 
+# Returns the modified post body if any words have been modified, 
+# otherwise, it returns None
 def apostrophify_post(post_body):
    # flag is for determining if post body was modified in any way
    flag = False
@@ -54,6 +61,16 @@ def apostrophify_post(post_body):
          words[i] = word[:1] + "'" + word[1:]
          flag = True
    return " ".join(words) if flag == True else None
+
+# credit to bboe (https://gist.github.com/bboe/1860715)
+def handle_ratelimit(func, *args, **kwargs):
+    while True:
+        try:
+            func(*args, **kwargs)
+            break
+        except praw.errors.RateLimitExceeded as error:
+            print "Rate limit exceeded: sleeping for %d seconds" % error.sleep_time
+            time.sleep(error.sleep_time)
 
 if __name__ == "__main__":
    if not os.path.isfile("config_bot.py"):
@@ -65,13 +82,14 @@ if __name__ == "__main__":
    r = praw.Reddit(user_agent = user_agent)
    r.login(REDDIT_USERNAME, REDDIT_PASS)
 
-   for comment in praw.helpers.comment_stream(r, "pythonforengineers", limit = 25):
+   for comment in praw.helpers.comment_stream(r, "pythonforengineers"):
       if look_up_post_id(comment.id) == False:
          text = apostrophify_post(comment.body)
          insert_db(comment.id)
          if text == None:
             continue
          else:
-            comment.reply(text)
-         print("Responded to: " + comment.id)
-         time.sleep(60)
+            handle_ratelimit(comment.reply, text)
+            print("Responded to: " + comment.id)
+            # not sure if this will prevent me from getting rate limited
+            time.sleep(60)
