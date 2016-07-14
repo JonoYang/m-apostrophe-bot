@@ -38,7 +38,7 @@ def insert_db(post_id):
    conn.close()
 
 def look_up_post_id(post_id):
-   conn = sqlite3.connect("posts_replied_to.sqlite")
+   conn = sqlite3.connect("posts_replied_to.sqlite") 
    c = conn.cursor()
    c.execute('SELECT post_id FROM posts WHERE post_id = (?)', (post_id,))
    data = c.fetchone()
@@ -54,6 +54,8 @@ def main():
    user_agent = "m-apostrophe-bot 0.1"
    r = praw.Reddit(user_agent = user_agent)
    r.login(REDDIT_USERNAME, REDDIT_PASS)
+
+   for comment in praw.helpers.comment_stream(r, 'all'):
 
 if __name__ == '__main__':
    main()
