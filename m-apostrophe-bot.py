@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 """
 Written by Jonathan "Jono" Yang - the.jonathan.yang@gmail.com
@@ -17,13 +18,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import config_bot
+import morse
 import os
 import praw
 import pdb
 import sqlite3
 import sys
 import time
-from config_bot import *
 
 # Creates sqlite3 database with a table named posts with one row named post_id
 def init_db():
@@ -82,11 +84,11 @@ if __name__ == "__main__":
 
    user_agent = "m-apostrophe-bot 0.1"
    r = praw.Reddit(user_agent = user_agent)
-   r.login(REDDIT_USERNAME, REDDIT_PASS)
+   r.login(config_bot.REDDIT_USERNAME, config_bot.REDDIT_PASS)
 
    for comment in praw.helpers.comment_stream(r, "pythonforengineers"):
       if look_up_post_id(comment.id) == False:
-         text = apostrophify_post(comment.body)
+         text = morse.make_morse(comment.body)
          insert_db(comment.id)
          if text == None:
             continue
