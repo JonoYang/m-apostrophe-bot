@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Written by Jonathan "Jono" Yang - the.jonathan.yang@gmail.com
 
@@ -55,10 +57,34 @@ morse_code = {
 }
 
 def make_morse(string):
-   temp = []
-   for char in string.upper():
-      if char in morse_code:
-         temp.append(morse_code[char])
-      else:
-         continue
-   return "   ".join(temp)
+   word_temp = []
+   post_temp = []
+
+   # We set each letter in the post to upper case and break the string
+   # into a list of words.
+   string = string.upper().split()
+   
+   for word in string:
+      for char in word:
+         if char in morse_code:
+            # We translate each character of a word and put its Morse 
+            # code representation as a string into a list.
+            word_temp.append(morse_code[char])
+         else:
+            # If a character does not have a Morse code representation,
+            # we ignore it and move on to the next character
+            continue
+
+      # Once we are done converting each caracter of a word into it's
+      # Morse code representation, we join the list together to form
+      # a whole string and append the word to the post_temp list, that
+      # stores the Morse code representation of each word in the post.
+      post_temp.append("   ".join(word_temp))
+
+      # We clear the temporary word list for the next word
+      word_temp = []
+
+   # We finally join all the words together as a single string, where
+   # the words are delimited by 3 spaces, then a slash, followed by 3
+   # more spaces
+   return "   /   ".join(post_temp)
